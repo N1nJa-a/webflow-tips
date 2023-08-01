@@ -1,0 +1,50 @@
+// Function to handle showing the popup with company details
+  function showPopup(companyData) {
+    // Get the popup container
+    const popupContainer = document.querySelector('.genai-popup_container');
+
+    // Get elements from the popup
+    const companyIcon = popupContainer.querySelector('#company-icon');
+    const companyName = popupContainer.querySelector('#company-name');
+    const companyDescription = popupContainer.querySelector('#company-brief-description');
+    const foundingYear = popupContainer.querySelector('#founding-year');
+    const stage = popupContainer.querySelector('#stage');
+    const employee = popupContainer.querySelector('#employee');
+    const sector = popupContainer.querySelector('#sector');
+    const location = popupContainer.querySelector('#location');
+    const investor = popupContainer.querySelector('#investor');
+    // ... (other popup elements)
+
+    // Populate the popup elements with company data
+    companyIcon.src = companyData.Favicon;
+    companyName.textContent = companyData.Name;
+    companyDescription.textContent = companyData.Description;
+    foundingYear.textContent = companyData['Founding Year'];
+    stage.textContent = companyData.Stage;
+    employee.textContent = companyData.Employees;
+    sector.textContent = companyData.Sector;
+    location.textContent = companyData['HQ Location'];
+    investor.textContent = companyData['Key Investors'];
+    // ... (populate other popup elements)
+
+    // Show the popup
+    popupContainer.style.display = 'block';
+  }
+
+  // Get all card elements
+  const cardElements = document.querySelectorAll('.genai-landscape_company-logo-name-wrapper');
+
+  // Add click event listeners to each card
+  cardElements.forEach(cardElement => {
+    cardElement.addEventListener('click', () => {
+      // Get the index of the card clicked
+      const index = Array.from(cardElements).indexOf(cardElement);
+
+      // Get the corresponding company data
+      const companyData = data[index];
+
+      // Call the function to show the popup with the company details
+      showPopup(companyData);
+    });
+  });
+}
