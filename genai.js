@@ -1,52 +1,31 @@
+//Declare the data variable globally
+let data = [];
+
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("https://n8n.epyc.in/webhook/genai")
+  fetch("https://n8n.epyc.in/webhook/genai-test")
     .then((response) => response.json())
-    .then((data) => {
+    .then((responseData) => {
+      // Save the data globally
+      data = responseData;
       // Call a function to display the data
       populateCardLayout(data);
 
       populateLandscapeLayout(data);
-
-      populateCategoryDropdown(data);
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 });
 
-//filter dropdown code
-function populateCategoryDropdown(data) {
-  const categoryDropdown = document.getElementById("category-dropdown");
-
-  // Filter unique categories from the data
-  const uniqueCategories = [
-    ...new Set(data.map((company) => company.Category))
-  ];
-
-  // Sort the categories alphabetically
-  uniqueCategories.sort();
-
-  // Create and append div elements for each category
-  uniqueCategories.forEach((category) => {
-    const pfCbFieldDiv = document.createElement("div");
-    pfCbFieldDiv.classList.add("pf-cb_field");
-
-    const pfCbLabelDiv = document.createElement("div");
-    pfCbLabelDiv.classList.add("pf-cb_label");
-    pfCbLabelDiv.textContent = category;
-
-    pfCbFieldDiv.appendChild(pfCbLabelDiv);
-    categoryDropdown.appendChild(pfCbFieldDiv);
-  });
-}
-
 // View toggle
 document.addEventListener("DOMContentLoaded", () => {
-  const filterWrapper = document.getElementById("filter-wrapper");
+  // const filterWrapper = document.getElementById("filter-wrapper");
   const landscapeLayout = document.getElementById("landscape-layout");
   const cardLayout = document.getElementById("card-layout");
   const cardDiv = document.getElementById("card");
   const landscapeDiv = document.getElementById("landscape");
+
+  cardLayout.setAttribute("fs-cmsfilter-element", "list");
 
   landscapeLayout.style.display = "none";
 
@@ -55,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add click event listener to the card div
   cardDiv.addEventListener("click", () => {
-    filterWrapper.style.display = "flex";
+    // filterWrapper.style.display = "flex";
     cardLayout.style.display = "flex";
     landscapeLayout.style.display = "none";
     cardDiv.classList.add("is-active");
@@ -64,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add click event listener to the landscape div
   landscapeDiv.addEventListener("click", () => {
-    filterWrapper.style.display = "none";
+    // filterWrapper.style.display = "none";
     cardLayout.style.display = "none";
     landscapeLayout.style.display = "flex";
     landscapeDiv.classList.add("is-active");
@@ -75,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //Card data code
 function populateCardLayout(data) {
   // Group companies by category
+
   const groupedData = {};
   data.forEach((company) => {
     const category = company.Category;
@@ -84,14 +64,11 @@ function populateCardLayout(data) {
     groupedData[category].push(company);
   });
 
-  // Sort categories alphabetically
-  const sortedCategories = Object.keys(groupedData).sort();
-
   // Get the wrapper element for all cards
   const companyCardsWrapper = document.querySelector(".genai-card_wrapper");
 
   // Loop through each category and create a container for the cards
-  sortedCategories.forEach((category) => {
+  Object.keys(groupedData).forEach((category) => {
     const categoryContainer = document.createElement("div");
     categoryContainer.classList.add("genai-card_category-wrapper");
 
@@ -126,46 +103,46 @@ function populateCardLayout(data) {
     // Add cards for the category
     const _3ColLayout = document.createElement("div");
     _3ColLayout.classList.add("_3-col-layout", "genai-card_layout");
-    _3ColLayout.setAttribute("fs-cmsfilter-element", "list");
+    // _3ColLayout.setAttribute("fs-cmsfilter-element", "list");
 
     sortedCompanies.forEach((company) => {
       const cardTemplate = `
         <div class="genai-card" data-company='${JSON.stringify(company)}'>
           <div>
             <div class="genai-card_company-logo-name-wrapper">
-              <div class="genai-card_company-logo-container">
-                ${
-                  company.Favicon
-                    ? `<img src="${company.Favicon}" loading="lazy" alt="" class="genai-card_company-logo" />`
-                    : ""
-                }
-              </div>
+            <div class="genai-card_company-logo-container">
               ${
-                company.Name
-                  ? `<h3 class="heading-style-h6" fs-cmsfilter-field="name">${company.Name}</h3>`
+                company.Favicon
+                  ? `<img src="${company.Favicon}" loading="lazy" alt="" class="genai-card_company-logo" />`
                   : ""
               }
             </div>
-            <div class="text-container padding-horizontal padding-xsmall">
-              ${
-                company["Brief Description"]
-                  ? `<div class="genai-company-description" fs-cmsfilter-field="description">${company["Brief Description"]}</div>`
-                  : ""
-              }
-            </div>
-          </div>
-          <div class="genai-card_category-container">
             ${
-              company["Sub-category"]
-                ? `<div class="genai-card_category-tag" fs-cmsfilter-field="tag">${company["Sub-category"]}</div>`
-                : ""
-            }
-            ${
-              company.Modality
-                ? `<div class="genai-card_category-tag yellow-tag" fs-cmsfilter-field="modality">${company.Modality}</div>`
+              company.Name
+                ? `<h3 class="genai-p-l-company-name" fs-cmsfilter-field="name">${company.Name}</h3>`
                 : ""
             }
           </div>
+          <div class="text-container padding-horizontal padding-xsmall">
+            ${
+              company["Brief Description"]
+                ? `<div class="genai-company-description" fs-cmsfilter-field="description">${company["Brief Description"]}</div>`
+                : ""
+            }
+          </div>
+        </div>
+        <div class="genai-card_category-container">
+          ${
+            company["Sub-category"]
+              ? `<div class="genai-card_category-tag" fs-cmsfilter-field="tag">${company["Sub-category"]}</div>`
+              : ""
+          }
+          ${
+            company.Modality
+              ? `<div class="genai-card_category-tag yellow-tag" fs-cmsfilter-field="modality">${company.Modality}</div>`
+              : ""
+          }
+        </div>
         </div>
       `;
 
@@ -183,27 +160,15 @@ function populateCardLayout(data) {
   cardElements.forEach((card) => {
     card.addEventListener("click", () => {
       const companyData = JSON.parse(card.dataset.company);
-      console.log("card clicked");
+      // console.log("card clicked");
       openPopup(companyData);
-      console.log("popup opened");
+      // console.log("popup opened");
     });
   });
 }
 
-//landscape data code
-// Function to populate the landscape layout with data
+// Landscape data code
 function populateLandscapeLayout(data) {
-  // Sort the data alphabetically by category, sub-category, and company name
-  data.sort((a, b) => {
-    if (a.Category === b.Category) {
-      if (a["Sub-category"] === b["Sub-category"]) {
-        return a.Name.localeCompare(b.Name);
-      }
-      return a["Sub-category"].localeCompare(b["Sub-category"]);
-    }
-    return a.Category.localeCompare(b.Category);
-  });
-
   // Group companies by category and sub-category
   const groupedData = {};
   data.forEach((company) => {
@@ -250,8 +215,13 @@ function populateLandscapeLayout(data) {
       const layoutWrapper = document.createElement("div");
       layoutWrapper.classList.add("genai-landscape_layout");
 
+      // Sort companies within the sub-category alphabetically
+      const sortedCompanies = groupedData[category][subCategory].sort((a, b) =>
+        a.Name.localeCompare(b.Name)
+      );
+
       // Loop through each company in the current sub-category
-      groupedData[category][subCategory].forEach((company) => {
+      sortedCompanies.forEach((company) => {
         const cardElement = createCardElement(
           company.Favicon,
           company.Name,
@@ -287,7 +257,7 @@ function createCardElement(favicon, companyName, companyData) {
   companyLogo.classList.add("genai-card_company-logo");
 
   const companyNameElement = document.createElement("h3");
-  companyNameElement.classList.add("heading-style-h6");
+  companyNameElement.classList.add("genai-p-l-company-name");
   companyNameElement.textContent = companyName;
 
   companyLogoContainer.appendChild(companyLogo);
@@ -303,6 +273,7 @@ function createCardElement(favicon, companyName, companyData) {
 
 // Function to open the popup with company details
 function openPopup(companyData) {
+  // console.log("Popup opened");
   const popupWrapper = document.querySelector(".genai-popup_wrapper");
   popupWrapper.style.display = "flex";
   popupWrapper.style.opacity = "1";
@@ -316,7 +287,7 @@ function openPopup(companyData) {
   const foundingYear = document.getElementById("founding-year");
   const stage = document.getElementById("stage");
   const employee = document.getElementById("employee");
-  const sector = document.getElementById("sector");
+  const companyModality = document.getElementById("company-modality");
   const location = document.getElementById("location");
   const investor = document.getElementById("investor");
   const companyDescription = document.getElementById("company-description");
@@ -337,7 +308,7 @@ function openPopup(companyData) {
   const founderName4 = document.getElementById("founder-name-4");
   const founderLinkedIn4 = document.getElementById("founder-linkedin-4");
 
-  console.log(companyData);
+  // console.log(companyData);
 
   // Populate the popup with company data
   companyIcon.src = companyData.Favicon;
@@ -345,8 +316,8 @@ function openPopup(companyData) {
   companyBriefDescription.textContent = companyData["Brief Description"];
   foundingYear.textContent = companyData["Founding Year"];
   stage.textContent = companyData.Stage;
-  employee.textContent = companyData["Employee count"];
-  sector.textContent = companyData.Modality;
+  employee.textContent = companyData["Employee Count Category"];
+  companyModality.textContent = companyData.Modality;
   location.textContent = companyData.HQ;
   investor.textContent = companyData["Key Investors"];
   companyDescription.textContent = companyData["Detailed Description"];
@@ -360,30 +331,26 @@ function openPopup(companyData) {
   companyWebsite.href = httpsUrl;
   companyLinkedIn.href = companyData["LinkedIn Profile"];
 
-  if (companyData["Founders Linkedin 1"] !== "") {
+  if (companyData["Founders Name 1"] !== "") {
     founder1.style.display = "flex";
-    founderName1.textContent = companyData["Founders Linkedin 1"];
-    founderName1.textContent = companyData["Founders Linkedin 1"];
-    founderLinkedIn1.href = companyData["Founders Linkedin URL 1"];
+    founderName1.textContent = companyData["Founders Name 1"];
+    founderLinkedIn1.href = companyData["Founder 1 Linkedin"];
   }
-  if (companyData["Founders Linkedin 2"] !== "") {
+  if (companyData["Founders Name 2"] !== "") {
     founder2.style.display = "flex";
-    founderName2.textContent = companyData["Founders Linkedin 2"];
-    founderName2.textContent = companyData["Founders Linkedin 2"];
-    founderLinkedIn2.href = companyData["Founders Linkedin URL 2"];
+    founderName2.textContent = companyData["Founders Name 2"];
+    founderLinkedIn2.href = companyData["Founder 2 Linkedin"];
   }
-  if (companyData["Founders Linkedin 3"] !== "") {
+  if (companyData["Founders Name 3"] !== "") {
     founder3.style.display = "flex";
-    founderName3.textContent = companyData["Founders Linkedin 3"];
-    founderName3.textContent = companyData["Founders Linkedin 3"];
-    founderLinkedIn3.href = companyData["Founders Linkedin URL 3"];
+    founderName3.textContent = companyData["Founders Name 3"];
+    founderLinkedIn3.href = companyData["Founder 3 Linkedin"];
   }
-  if (companyData["Founders Linkedin 4"] !== "") {
+  if (companyData["Founders Name 4"] !== "") {
     founder4.style.display = "flex";
-    founderName4.textContent = companyData["Founders Linkedin 4"];
-    founderName4.textContent = companyData["Founders Linkedin 4"];
-    founderLinkedIn4.href = companyData["Founders Linkedin URL 4"];
+    founderName4.textContent = companyData["Founders Name 4"];
+    founderLinkedIn4.href = companyData["Founder 4 Linkedin"];
   }
 }
 
-//---------------------------working code ends here---------------------------
+// console.log("Code run successfully");
