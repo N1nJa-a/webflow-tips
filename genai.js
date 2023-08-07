@@ -2,7 +2,7 @@
 let data = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("https://n8n.epyc.in/webhook/genai-test")
+  fetch("https://n8n.epyc.in/webhook/genai")
     .then((response) => response.json())
     .then((responseData) => {
       // Save the data globally
