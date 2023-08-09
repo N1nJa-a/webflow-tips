@@ -1,24 +1,25 @@
 //Declare the data variable globally
 let data = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetch("https://n8n.epyc.in/webhook/genai")
-    .then((response) => response.json())
-    .then((responseData) => {
-      // Save the data globally
-      data = responseData;
-      // Call a function to display the data
-      populateCardLayout(data);
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await fetch("https://n8n.epyc.in/webhook/genai");
+    const responseData = await response.json();
+    // Save the data globally
+    data = responseData;
+    // Call a function to display the data
+    populateCardLayout(data);
 
-      populateLandscapeLayout(data);
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
+    populateLandscapeLayout(data);
+
+    initializeViewToggle();
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 });
 
-// View toggle
-document.addEventListener("DOMContentLoaded", () => {
+// view switcher
+function initializeViewToggle() {
   // const filterWrapper = document.getElementById("filter-wrapper");
   const landscapeLayout = document.getElementById("landscape-layout");
   const cardLayout = document.getElementById("card-layout");
@@ -49,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     landscapeDiv.classList.add("is-active");
     cardDiv.classList.remove("is-active");
   });
-});
+}
 
 //Card data code
 function populateCardLayout(data) {
@@ -106,8 +107,11 @@ function populateCardLayout(data) {
     // _3ColLayout.setAttribute("fs-cmsfilter-element", "list");
 
     sortedCompanies.forEach((company) => {
+      console.log("company", company["Company ID"]);
       const cardTemplate = `
-        <div class="genai-card" data-company='${JSON.stringify(company)}'>
+        <div class="genai-card" data-company='${JSON.stringify(
+          company["Company ID"]
+        )}'>
           <div>
             <div class="genai-card_company-logo-name-wrapper">
             <div class="genai-card_company-logo-container">
@@ -157,12 +161,21 @@ function populateCardLayout(data) {
 
   // Add click event listener to each card in card layout
   const cardElements = document.querySelectorAll(".genai-card");
+  console.log(cardElements);
   cardElements.forEach((card) => {
     card.addEventListener("click", () => {
-      const companyData = JSON.parse(card.dataset.company);
-      // console.log("card clicked");
+      console.log("card clicked before", card.dataset);
+      console.log("data:", data);
+      const companyID = card.dataset.company;
+      const companyData = data.find((d) => {
+        return d["Company ID"] == companyID;
+      });
+      console.log("companyData", companyData);
+
+      // const companyData = JSON.parse(card.dataset.company);
+      console.log("card clicked");
       openPopup(companyData);
-      // console.log("popup opened");
+      console.log("popup opened");
     });
   });
 }
@@ -317,7 +330,11 @@ function openPopup(companyData) {
   foundingYear.textContent = companyData["Founding Year"];
   stage.textContent = companyData.Stage;
   employee.textContent = companyData["Employee Count Category"];
-  companyModality.textContent = companyData.Modality;
+  if (companyData.Modality !== "") {
+    companyModality.textContent = companyData.Modality;
+  } else {
+    companyModality.style.display = "none";
+  }
   location.textContent = companyData.HQ;
   investor.textContent = companyData["Key Investors"];
   companyDescription.textContent = companyData["Detailed Description"];
